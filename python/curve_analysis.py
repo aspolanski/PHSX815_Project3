@@ -17,7 +17,7 @@ from utils import log_likelihood
 import emcee
 import corner
 from scipy.optimize import minimize
-
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 ##### Author: Alex Polanski #####
 
 
@@ -55,9 +55,9 @@ if __name__ == "__main__":
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_likelihood, args=(time, flux, err))
 
-    sampler.run_mcmc(pos, 10000, progress=True)
+    sampler.run_mcmc(pos, 1000, progress=True)
 
-    flat_samples = sampler.get_chain(discard=1000, thin=15, flat=True)
+    flat_samples = sampler.get_chain(discard=100, thin=15, flat=True)
 
     # Get the Median value of the posteriors and the uncertainties 
 
@@ -96,7 +96,13 @@ if __name__ == "__main__":
     ax.set_ylabel("Normalized Flux")
     ax.legend(loc='upper right')
 
+    #inset residual plot
 
+    axin = inset_axes(ax, width="25%", height="15%", loc='lower right')
+    axin.hist((flux-transit_model(time, medians[0],medians[1],medians[2])))
+    axin.tick_params(labelleft=False, labelbottom=False)
+    axin.axvline(0.0, linestyle='--',color='black')
+    axin.set_title("Residuals", loc='left')
 
 
 
