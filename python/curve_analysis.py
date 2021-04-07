@@ -9,7 +9,7 @@ import os, glob, sys
 from tqdm import tqdm
 from astropy import units as u
 
-#plt.style.use("/home/custom_style1.mplstyle")
+plt.style.use("./rc_file/custom_style1.mplstyle")
 
 #Other Modules:
 from utils import transit_model
