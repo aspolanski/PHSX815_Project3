@@ -9,7 +9,7 @@ import os, glob, sys
 from tqdm import tqdm
 from astropy import units as u
 
-plt.style.use("/home/custom_style1.mplstyle")
+#plt.style.use("/home/custom_style1.mplstyle")
 
 #Other Modules:
 from utils import transit_model
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     # MCMC
 
-    labels = ['t0','rp','ar']
+    labels = ['$t_0$','$R_P/R_*$','$a/R_*$']
 
     pos = soln.x + 1e-4 * np.random.randn(32, 3)
 
@@ -55,13 +55,50 @@ if __name__ == "__main__":
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_likelihood, args=(time, flux, err))
 
-    sampler.run_mcmc(pos, 1000, progress=True)
+    sampler.run_mcmc(pos, 10000, progress=True)
 
-    flat_samples = sampler.get_chain(discard=100, thin=15, flat=True)
+    flat_samples = sampler.get_chain(discard=1000, thin=15, flat=True)
 
-    fig,axes = plt.subplots(3,3,figsize=(8,8))
+    # Get the Median value of the posteriors and the uncertainties 
 
-    corner.corner(flat_samples, labels=labels,fig=fig,labelpad=0.01)
+    medians = []
+    quants = []
+    per_error = []
+    for i in range(ndim):
+        mcmc = np.percentile(flat_samples[:, i], [16, 50, 84])
+        q = np.diff(mcmc)
+        medians.append(mcmc[1])
+        quants.append([q[0],q[1]])
+        per_error.append((np.mean([q[0],q[1]])/mcmc[1])*100.0)
+
+    print(f'\nMedian Parameters, Uncertainties, Percent Error:\n t0: {medians[0]:0.3} +{quants[0][0]:0.3} -{quants[0][1]:0.3} | {np.abs(per_error[0]):0.2}\n Rp/R*: {medians[1]:0.3} +{quants[1][0]:0.3} -{quants[1][1]:0.3} | {np.abs(per_error[1]):0.2}\n a/R*: {medians[2]:0.3} +{quants[2][0]:0.3} -{quants[2][1]:0.3} | {np.abs(per_error[2]):0.2}\n')
+
+
+
+
+    fig_corner,axes = plt.subplots(3,3,figsize=(8,10))
+
+    corner.corner(flat_samples, labels=labels,fig=fig_corner,labelpad=0.01, truths=medians)
+
+    for i in range(ndim):
+        axe = axes[i,i]
+        axe.axvline(medians[i])
+        
+        axe.axvline(medians[i]-quants[i][0],linestyle='--')
+        axe.axvline(medians[i]+quants[i][1],linestyle='--')
+
+
+    fig, ax = plt.subplots(figsize=(10,8))
+    t = np.linspace(np.min(time),np.max(time), 1000)
+    ax.errorbar(time, flux, yerr=err, fmt='.k', label='Data')
+    ax.plot(t, transit_model(t, medians[0],medians[1],medians[2]), linewidth = 3.0, label='Median Model')
+    ax.set_xlabel("Time from Transit Center (days)")
+    ax.set_ylabel("Normalized Flux")
+    ax.legend(loc='upper right')
+
+
+
+
 
 
     plt.show()

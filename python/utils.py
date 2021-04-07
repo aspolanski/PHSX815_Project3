@@ -20,7 +20,8 @@ def log_likelihood(theta, x, y, yerr):
 
     model_y = transit_model(x, t0, rp, ar)
 
-    return( -0.5 * np.sum(np.square(model_y - y)/yerr**2 + np.log(2*np.pi*yerr**2)) )
+    return( -0.5 * np.sum((model_y - y)**2/ yerr**2 + np.log(2*np.pi*yerr**2)) )
+    #return( -0.5 * np.sum(np.square(model_y - y)/yerr**2 + np.log(2*np.pi*yerr**2)) )
 
 def transit_model(time, t0, rp, ar):
 

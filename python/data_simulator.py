@@ -31,8 +31,8 @@ if __name__ == "__main__":
         p = sys.argv.index('-rp')
         rp = float(sys.argv[p+1])
 
-    if '-rate' in sys.argv:
-        p = sys.argv.index('-rate')
+    if '-exp' in sys.argv:
+        p = sys.argv.index('-exp')
         rate = int(sys.argv[p+1])
 
     if '-error' in sys.argv:
@@ -43,10 +43,14 @@ if __name__ == "__main__":
         p = sys.argv.index('-fname')
         fname = str(sys.argv[p+1])
     
+    #calculate the number of points needed to obtain the input sampling rate:
 
-    time = np.linspace(-0.25,0.25,rate)
+    n_points = round(720/rate)
 
-    flux = transit_model(time,t0,rp,ar) + np.random.normal(0.0,1e-5,len(time))
+
+    time = np.linspace(-0.25,0.25,n_points)
+
+    flux = transit_model(time,t0,rp,ar) + np.random.normal(0.0,1e-3,len(time))
     flux_err = np.ones(len(time)) * error
 
     data_frame = pd.DataFrame(data={'time':time, 'flux':flux, 'flux_error':flux_err})
