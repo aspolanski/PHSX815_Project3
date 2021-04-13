@@ -76,9 +76,9 @@ if __name__ == "__main__":
 
 
 
-    fig_corner,axes = plt.subplots(3,3,figsize=(8,10))
+    fig_corner,axes = plt.subplots(3,3,figsize=(10,10))
 
-    corner.corner(flat_samples, labels=labels,fig=fig_corner,labelpad=0.01, truths=medians)
+    corner.corner(flat_samples, labels=labels,fig=fig_corner,labelpad=0.1, truths=medians)
 
     for i in range(ndim):
         axe = axes[i,i]
@@ -88,7 +88,7 @@ if __name__ == "__main__":
         axe.axvline(medians[i]+quants[i][1],linestyle='--')
 
 
-    fig, ax = plt.subplots(figsize=(10,8))
+    fig, ax = plt.subplots(figsize=(15,10))
     t = np.linspace(np.min(time),np.max(time), 1000)
     ax.errorbar(time, flux, yerr=err, fmt='.k', label='Data')
     ax.plot(t, transit_model(t, medians[0],medians[1],medians[2]), linewidth = 3.0, label='Median Model')
